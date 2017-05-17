@@ -3,6 +3,7 @@ using Orleans;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Test
@@ -52,6 +53,7 @@ namespace Test
                 await WriteUserProps(jack);
             }
 
+            var sw = Stopwatch.StartNew();
             for (int i = 0; i < 10; i++)
             {
                 var user = client.GetGrain<IUser>($"user{i}@outlook.com");
@@ -61,8 +63,12 @@ namespace Test
                 await WriteUserProps(user);
             }
 
+            sw.Stop();
+            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds}");
+
             await WriteUserProps(mark);
             await WriteUserProps(jack);
+
         }
 
         private static async Task WriteUserProps(IUser user)
