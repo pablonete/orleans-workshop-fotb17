@@ -3,6 +3,7 @@ using Orleans;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
+using OrleansDashboard;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +36,10 @@ namespace Test
             siloConfig.Globals.DataConnectionString = connectionString;
             siloConfig.Globals.DeploymentId = clusterId;
             siloConfig.AddAzureTableStorageProvider("Storage", connectionString);
+            if (index == 1)
+            {
+                siloConfig.Globals.RegisterDashboard(8081);
+            }
 
             var silo = new SiloHost("Test Silo", siloConfig);
             silo.InitializeOrleansSilo();
