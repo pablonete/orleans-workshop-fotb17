@@ -18,7 +18,6 @@ namespace Test
         {
             var clusterId = Guid.NewGuid().ToString();
             StartAzureTableSilo(1, clusterId);
-            StartAzureTableSilo(2, clusterId);
 
             var client = StartAzureTableClient(clusterId);
             Test(client).Wait();
@@ -35,6 +34,7 @@ namespace Test
             siloConfig.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.AzureTable;
             siloConfig.Globals.DataConnectionString = connectionString;
             siloConfig.Globals.DeploymentId = clusterId;
+            siloConfig.AddAzureTableStorageProvider("Storage", connectionString);
 
             var silo = new SiloHost("Test Silo", siloConfig);
             silo.InitializeOrleansSilo();
@@ -60,25 +60,31 @@ namespace Test
         public static async Task Test(IClusterClient client)
         {
             var mark = client.GetGrain<IUser>("mark@b.com");
-            await mark.SetName("Mark");
-            await mark.SetStatus("Share your lie with me!");
-
             var jack = client.GetGrain<IUser>("jack@b.com");
-            await jack.SetName("Jack");
-            await jack.SetStatus("Tweet me!");
+
+            // Don't populate anymore, users are already saved on storage
+            // await PopulateUsers(client, mark, jack);
 
             await WriteUserProps(mark);
             await WriteUserProps(jack);
+        }
 
-            var ok = await mark.AddFriend(jack);
-            if (ok)
-            {
-                Console.WriteLine("Invited!");
-                await WriteUserProps(mark);
-                await WriteUserProps(jack);
-            }
+        private static async Task WriteUserProps(IUser user)
+        {
+            var props = await user.GetProperties();
+            Console.WriteLine($"{user.GetPrimaryKeyString()}: {props}");
+        }
 
-            var sw = Stopwatch.StartNew();
+        public static async Task PopulateUsers(IClusterClient client, IUser mark, IUser jack)
+        {
+            await mark.SetName("Mark");
+            await mark.SetStatus("Share your lie with me!");
+
+            await jack.SetName("Jack");
+            await jack.SetStatus("Tweet me!");
+
+            await mark.AddFriend(jack);
+
             for (int i = 0; i < 100; i++)
             {
                 var user = client.GetGrain<IUser>($"user{i}@outlook.com");
@@ -87,11 +93,6 @@ namespace Test
                 await (i % 2 == 0 ? mark : jack).AddFriend(user);
                 //await WriteUserProps(user);
             }
-
-            sw.Stop();
-            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds}");
-
-            sw.Restart();
 
             var tasks = new List<Task>();
             for (int i = 100; i < 200; i++)
@@ -104,15 +105,6 @@ namespace Test
             }
 
             await Task.WhenAll(tasks);
-
-            sw.Stop();
-            Console.WriteLine($"Parallel elapsed: {sw.ElapsedMilliseconds}");
-        }
-
-        private static async Task WriteUserProps(IUser user)
-        {
-            var props = await user.GetProperties();
-            Console.WriteLine($"{user.GetPrimaryKeyString()}: {props}");
         }
     }
 }

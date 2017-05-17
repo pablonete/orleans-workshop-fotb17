@@ -1,13 +1,13 @@
 ﻿using Interface;
 using Orleans;
+using Orleans.Providers;
 using System.Threading.Tasks;
 
 namespace Grains
 {
-    public class UserGrain : Grain, IUser
+    [StorageProvider(ProviderName = "Storage")]
+    public class UserGrain : Grain<UserProperties>, IUser
     {
-        private readonly UserProperties props = new UserProperties();
-
         public async Task<bool> AddFriend(IUser friend)
         {
             var ok = await friend.InviteFriend(this);
@@ -16,39 +16,42 @@ namespace Grains
                 return false;
             }
 
-            if (!this.props.Friends.Contains(friend))
+            if (!this.State.Friends.Contains(friend))
             {
-                this.props.Friends.Add(friend);
+                this.State.Friends.Add(friend);
             }
+
+            await this.WriteStateAsync();
 
             return true;
         }
 
         public Task<UserProperties> GetProperties()
         {
-            return Task.FromResult(this.props);
+            return Task.FromResult(this.State);
         }
 
-        public Task<bool> InviteFriend(IUser friend)
+        public async Task<bool> InviteFriend(IUser friend)
         {
-            if (!this.props.Friends.Contains(friend))
+            if (!this.State.Friends.Contains(friend))
             {
-                this.props.Friends.Add(friend);
+                this.State.Friends.Add(friend);
             }
 
-            return Task.FromResult(true);
+            await this.WriteStateAsync();
+            return true;
         }
 
         public Task SetName(string name)
         {
-            this.props.Name = name;
-            return Task.CompletedTask;
+            this.State.Name = name;
+            return this.WriteStateAsync();
         }
 
         public Task SetStatus(string status)
         {
-            this.props.Status = status;
-            return Task.CompletedTask;
+            this.State.Status = status;
+            return this.WriteStateAsync();
         }
     }
 }
