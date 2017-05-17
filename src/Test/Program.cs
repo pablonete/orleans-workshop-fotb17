@@ -70,7 +70,10 @@ namespace Test
             // Don't populate anymore, users are already saved on storage
             // await PopulateUsers(client, mark, jack);
 
+            RequestContext.Set("test", "go-poke");
             await WriteUserProps(mark);
+            RequestContext.Set("test", null);
+
             await WriteUserProps(jack);
         }
 

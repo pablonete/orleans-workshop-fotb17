@@ -50,9 +50,14 @@ namespace Grains
             return true;
         }
 
-        public Task<UserProperties> GetProperties()
+        public async Task<UserProperties> GetProperties()
         {
-            return Task.FromResult(this.State);
+            if ((string)RequestContext.Get("test") == "go-poke")
+            {
+                await this.State.Friends.ToList()[0].Poke(this, "testing");
+            }
+
+            return this.State;
         }
 
         public async Task<bool> InviteFriend(IUser friend)
@@ -80,7 +85,8 @@ namespace Grains
 
         public Task Poke(IUser user, string message)
         {
-            Console.WriteLine($"User {user.GetPrimaryKeyString()} poked ${this.GetPrimaryKeyString()} with '{message}'");
+            var test = (string)RequestContext.Get("test");
+            Console.WriteLine($"User {user.GetPrimaryKeyString()} poked ${this.GetPrimaryKeyString()} with '{message}' {test}");
             return Task.CompletedTask;
         }
 
