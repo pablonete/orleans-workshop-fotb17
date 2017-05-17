@@ -4,18 +4,22 @@ using Orleans.Providers;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using Orleans.Runtime;
 
 namespace Grains
 {
     [StorageProvider(ProviderName = "Storage")]
-    public class UserGrain : Grain<UserProperties>, IUser
+    public class UserGrain : Grain<UserProperties>, IUser, IRemindable
     {
         private Random rand;
         public override Task OnActivateAsync()
         {
             this.rand = new Random(this.GetHashCode());
 
-            this.RegisterTimer(this.OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+            this.RegisterOrUpdateReminder("poke", TimeSpan.FromSeconds(this.rand.Next(60)), TimeSpan.FromSeconds(60));
+            // Reminder is persistent, once we register it for some users, they will get it even if they are not activated
+            // until we call UnregisterReminder("poke")
+
             return base.OnActivateAsync();
         }
 
@@ -78,6 +82,11 @@ namespace Grains
         {
             Console.WriteLine($"User {user.GetPrimaryKeyString()} poked ${this.GetPrimaryKeyString()} with '{message}'");
             return Task.CompletedTask;
+        }
+
+        public async Task ReceiveReminder(string reminderName, TickStatus status)
+        {
+            await this.OnTimer(null);
         }
     }
 }
