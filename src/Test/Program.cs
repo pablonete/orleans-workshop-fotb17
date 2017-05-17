@@ -3,6 +3,7 @@ using Orleans;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -54,21 +55,34 @@ namespace Test
             }
 
             var sw = Stopwatch.StartNew();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 var user = client.GetGrain<IUser>($"user{i}@outlook.com");
                 await user.SetName($"User #{i}");
                 await user.SetStatus(i % 3 == 0 ? "Sad" : "Happy");
                 await (i % 2 == 0 ? mark : jack).AddFriend(user);
-                await WriteUserProps(user);
+                //await WriteUserProps(user);
             }
 
             sw.Stop();
             Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds}");
 
-            await WriteUserProps(mark);
-            await WriteUserProps(jack);
+            sw.Restart();
 
+            var tasks = new List<Task>();
+            for (int i = 100; i < 200; i++)
+            {
+                var user = client.GetGrain<IUser>($"user{i}@outlook.com");
+                tasks.Add(user.SetName($"User #{i}"));
+                tasks.Add(user.SetStatus(i % 3 == 0 ? "Sad" : "Happy"));
+                tasks.Add((i % 2 == 0 ? mark : jack).AddFriend(user));
+                //tasks.Add(WriteUserProps(user));
+            }
+
+            await Task.WhenAll(tasks);
+
+            sw.Stop();
+            Console.WriteLine($"Parallel elapsed: {sw.ElapsedMilliseconds}");
         }
 
         private static async Task WriteUserProps(IUser user)
