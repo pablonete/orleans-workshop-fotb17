@@ -6,7 +6,7 @@ namespace Grains
 {
     public class UserGrain : Grain, IUser
     {
-        private UserProperties props;
+        private readonly UserProperties props = new UserProperties();
 
         public Task<UserProperties> GetProperties()
         {
