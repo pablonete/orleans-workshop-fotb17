@@ -51,6 +51,18 @@ namespace Test
                 await WriteUserProps(mark);
                 await WriteUserProps(jack);
             }
+
+            for (int i = 0; i < 10; i++)
+            {
+                var user = client.GetGrain<IUser>($"user{i}@outlook.com");
+                await user.SetName($"User #{i}");
+                await user.SetStatus(i % 3 == 0 ? "Sad" : "Happy");
+                await (i % 2 == 0 ? mark : jack).AddFriend(user);
+                await WriteUserProps(user);
+            }
+
+            await WriteUserProps(mark);
+            await WriteUserProps(jack);
         }
 
         private static async Task WriteUserProps(IUser user)
