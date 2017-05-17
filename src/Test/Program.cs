@@ -1,5 +1,6 @@
 ﻿using Interface;
 using Orleans;
+using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 using System;
@@ -11,26 +12,49 @@ namespace Test
 {
     class Program
     {
+        static readonly string connectionString = "UseDevelopmentStorage=true";
+
         static void Main(string[] args)
         {
-            var siloConfig = ClusterConfiguration.LocalhostPrimarySilo();
-            siloConfig.Defaults.DefaultTraceLevel = Orleans.Runtime.Severity.Warning;
-            var silo = new SiloHost("Test Silo", siloConfig);
-            silo.InitializeOrleansSilo();
-            silo.StartOrleansSilo();
+            var clusterId = Guid.NewGuid().ToString();
+            StartAzureTableSilo(1, clusterId);
+            StartAzureTableSilo(2, clusterId);
 
-            System.Console.WriteLine("Silo started.");
-
-            var clientConfig = ClientConfiguration.LocalhostSilo();
-            var client = new ClientBuilder().UseConfiguration(clientConfig).Build();
-            client.Connect().Wait();
-
-            System.Console.WriteLine("Client connected");
-
+            var client = StartAzureTableClient(clusterId);
             Test(client).Wait();
 
             System.Console.WriteLine("Press any key...");
             System.Console.ReadKey();
+        }
+
+        public static void StartAzureTableSilo(int index, string clusterId)
+        {
+            var siloConfig = ClusterConfiguration.LocalhostPrimarySilo(11110 + index, 29999 + index);
+            siloConfig.Defaults.DefaultTraceLevel = Severity.Warning;
+            siloConfig.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.AzureTable;
+            siloConfig.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.AzureTable;
+            siloConfig.Globals.DataConnectionString = connectionString;
+            siloConfig.Globals.DeploymentId = clusterId;
+
+            var silo = new SiloHost("Test Silo", siloConfig);
+            silo.InitializeOrleansSilo();
+            silo.StartOrleansSilo();
+
+            System.Console.WriteLine($"Silo {index} started.");
+        }
+
+        public static IClusterClient StartAzureTableClient(string clusterId)
+        {
+            var clientConfig = ClientConfiguration.LocalhostSilo();
+            clientConfig.GatewayProvider = ClientConfiguration.GatewayProviderType.AzureTable;
+            clientConfig.DataConnectionString = connectionString;
+            clientConfig.DeploymentId = clusterId;
+
+            var client = new ClientBuilder().UseConfiguration(clientConfig).Build();
+            client.Connect().Wait();
+
+            System.Console.WriteLine("Client connected");
+            return client;
         }
 
         public static async Task Test(IClusterClient client)
