@@ -2,6 +2,7 @@
 using Orleans;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
+using System;
 using System.Threading.Tasks;
 
 namespace Test
@@ -40,11 +41,22 @@ namespace Test
             await jack.SetName("Jack");
             await jack.SetStatus("Tweet me!");
 
-            var props = await mark.GetProperties();
-            System.Console.WriteLine($"Mark: {props}");
+            await WriteUserProps(mark);
+            await WriteUserProps(jack);
 
-            var jackProps = await jack.GetProperties();
-            System.Console.WriteLine($"Mark: {jackProps}");
+            var ok = await mark.AddFriend(jack);
+            if (ok)
+            {
+                Console.WriteLine("Invited!");
+                await WriteUserProps(mark);
+                await WriteUserProps(jack);
+            }
+        }
+
+        private static async Task WriteUserProps(IUser user)
+        {
+            var props = await user.GetProperties();
+            Console.WriteLine($"{user.GetPrimaryKeyString()}: {props}");
         }
     }
 }
