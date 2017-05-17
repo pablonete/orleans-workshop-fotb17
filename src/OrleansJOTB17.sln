@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26507.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface", "Interface\Interface.csproj", "{9BFF6E91-5943-4785-9BB5-9F17EC2E1031}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grains", "Grains\Grains.csproj", "{A5FB04B3-F73F-4831-991C-8A1FFEE7A5D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{BA2F797C-98FB-46C3-9B33-9DB7FD42EE69}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BFF6E91-5943-4785-9BB5-9F17EC2E1031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BFF6E91-5943-4785-9BB5-9F17EC2E1031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BFF6E91-5943-4785-9BB5-9F17EC2E1031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BFF6E91-5943-4785-9BB5-9F17EC2E1031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5FB04B3-F73F-4831-991C-8A1FFEE7A5D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5FB04B3-F73F-4831-991C-8A1FFEE7A5D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5FB04B3-F73F-4831-991C-8A1FFEE7A5D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5FB04B3-F73F-4831-991C-8A1FFEE7A5D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA2F797C-98FB-46C3-9B33-9DB7FD42EE69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA2F797C-98FB-46C3-9B33-9DB7FD42EE69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA2F797C-98FB-46C3-9B33-9DB7FD42EE69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA2F797C-98FB-46C3-9B33-9DB7FD42EE69}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
